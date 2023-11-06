@@ -3,9 +3,9 @@ package com.vandenbreemen.kcoderwiki.macro
 import com.vandenbreemen.grucd.main.Main
 import com.vandenbreemen.ktt.interactor.StaticContentInteractor
 import com.vandenbreemen.ktt.macro.Macro
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 
 class UmlGeneratorMacro(private val staticContentInteractor: StaticContentInteractor,
 
@@ -16,31 +16,45 @@ class UmlGeneratorMacro(private val staticContentInteractor: StaticContentIntera
 
     val usage = "Usage:  path=/path/to/code, fileName=image.png"
 
+    private val jobSet: MutableSet<String> = ConcurrentHashMap.newKeySet()
+
     override fun execute(args: Map<String, String>): String {
-
-
-
-        CoroutineScope(Dispatchers.IO).launch {
-
-        }
 
         args["path"] ?.let { path->
 
             args["fileName"]?.let { ouputFile->
 
-                Main.main(arrayOf(
-                    "-o", "${staticContentInteractor.staticContentRoot}/$ouputFile", "-d", path
-                ))
+                var alreadyRunning = false
+                if(jobSet.contains(path)) {
+                    println("RUNNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                    alreadyRunning = true
+                } else  {
+                    jobSet.add(path)
+                    CoroutineScope(Dispatchers.IO).launch {
+                        Main.main(arrayOf(
+                            "-o", "${staticContentInteractor.staticContentRoot}/$ouputFile", "-d", path
+                        ))
+                        jobSet.remove(path)
+                    }
+                }
 
-                return "![UML for $path](/res/$ouputFile)"
+
+                return """
+                    ## UML for $path
+                    
+                    ![UML for $path](/res/$ouputFile)
+                    
+                    Note that ${if(alreadyRunning) "there is already a diagram in progress for this code" else "Diagramming has just been started"}  
+                """.trimIndent()
 
             } ?: run {
                 return usage
             }
 
         } ?: run {
-            return "Usage:  path=/path/to/code"
+            return usage
         }
+
     }
 
 
