@@ -2,6 +2,7 @@ package com.vandenbreemen.kcoderwiki.macro
 
 import com.vandenbreemen.grucd.main.Main
 import com.vandenbreemen.ktt.interactor.StaticContentInteractor
+import com.vandenbreemen.ktt.interactor.SystemAccessInteractor
 import com.vandenbreemen.ktt.macro.Macro
 import kotlinx.coroutines.*
 import java.util.concurrent.ConcurrentHashMap
@@ -14,11 +15,19 @@ class UmlGeneratorMacro(private val staticContentInteractor: StaticContentIntera
     override val name: String
         get() = "umlGen"
 
+
     val usage = "Usage:  path=/path/to/code, fileName=image.png"
+
+    override val description: String?
+        get() = """
+            Generates UML for the code in a specified path.
+            ##### Specific Usage:
+            $usage
+        """.trimIndent()
 
     private val jobSet: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
-    override fun execute(args: Map<String, String>): String {
+    override fun execute(args: Map<String, String>, dataAccessInteractor: SystemAccessInteractor): String {
 
         args["path"] ?.let { path->
 

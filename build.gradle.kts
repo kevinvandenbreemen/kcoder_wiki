@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
 
-    val kttVersion = "1.0.0.1000"
+    val kttVersion = "1.0.1.0000"
     implementation("com.github.kevinvandenbreemen:ktt:$kttVersion")
 
     val grucdVersion = "1.0.4.2003"
