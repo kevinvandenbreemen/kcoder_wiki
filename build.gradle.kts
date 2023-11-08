@@ -15,7 +15,7 @@ dependencies {
     val kttVersion = "1.0.1.0000"
     implementation("com.github.kevinvandenbreemen:ktt:$kttVersion")
 
-    val grucdVersion = "1.0.4.2003"
+    val grucdVersion = "1.0.4.2005"
     implementation("com.github.kevinvandenbreemen:grucd:$grucdVersion")
 
     val coroutinesVersion = "1.7.3"
