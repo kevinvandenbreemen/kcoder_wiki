@@ -16,7 +16,7 @@ class UmlGeneratorMacro(private val staticContentInteractor: StaticContentIntera
         get() = "umlGen"
 
 
-    val usage = "Usage:  path=/path/to/code, fileName=image.png"
+    val usage = "Usage:  path=/path/to/code"
 
     override val description: String?
         get() = """
@@ -26,39 +26,36 @@ class UmlGeneratorMacro(private val staticContentInteractor: StaticContentIntera
         """.trimIndent()
 
     private val jobSet: MutableSet<String> = ConcurrentHashMap.newKeySet()
+    private val pathsToGeneratedUml = ConcurrentHashMap<String, String>()
 
     override fun execute(args: Map<String, String>, dataAccessInteractor: SystemAccessInteractor): String {
 
         args["path"] ?.let { path->
 
-            args["fileName"]?.let { ouputFile->
+            var alreadyRunning = false
+            if(jobSet.contains(path)) {
+                alreadyRunning = true
+            } else  {
+                jobSet.add(path)
+                CoroutineScope(Dispatchers.IO).launch {
+                    val result = Main.generateAndProcessUML(arrayOf(
+                        "-d", path
+                    ))
 
-                var alreadyRunning = false
-                if(jobSet.contains(path)) {
-                    println("RUNNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                    alreadyRunning = true
-                } else  {
-                    jobSet.add(path)
-                    CoroutineScope(Dispatchers.IO).launch {
-                        Main.main(arrayOf(
-                            "-o", "${staticContentInteractor.staticContentRoot}/$ouputFile", "-d", path
-                        ))
-                        jobSet.remove(path)
-                    }
+                    pathsToGeneratedUml[path] = result
+
+                    jobSet.remove(path)
                 }
+            }
 
 
-                return """
+            return """
                     ## UML for $path
                     
-                    ![UML for $path](/res/$ouputFile)
+                    ${pathsToGeneratedUml[path]}
                     
                     Note that ${if(alreadyRunning) "there is already a diagram in progress for this code" else "Diagramming has just been started"}  
                 """.trimIndent()
-
-            } ?: run {
-                return usage
-            }
 
         } ?: run {
             return usage
