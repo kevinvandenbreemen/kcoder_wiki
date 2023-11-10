@@ -21,6 +21,9 @@ dependencies {
     val coroutinesVersion = "1.7.3"
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
 
+    val cache4KVersion = "0.12.0"
+    implementation("io.github.reactivecircus.cache4k:cache4k:$cache4KVersion")
+
     testImplementation(kotlin("test"))
 }
 

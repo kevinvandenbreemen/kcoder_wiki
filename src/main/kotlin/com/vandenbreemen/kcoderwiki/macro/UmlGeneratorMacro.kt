@@ -4,9 +4,11 @@ import com.vandenbreemen.grucd.main.Main
 import com.vandenbreemen.ktt.interactor.StaticContentInteractor
 import com.vandenbreemen.ktt.interactor.SystemAccessInteractor
 import com.vandenbreemen.ktt.macro.Macro
+import io.github.reactivecircus.cache4k.Cache
 import kotlinx.coroutines.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
+import kotlin.time.Duration.Companion.hours
 
 class UmlGeneratorMacro(private val staticContentInteractor: StaticContentInteractor,
 
@@ -16,7 +18,7 @@ class UmlGeneratorMacro(private val staticContentInteractor: StaticContentIntera
         get() = "umlGen"
 
 
-    val usage = "Usage:  path=/path/to/code"
+    private val usage = "Usage:  path=/path/to/code"
 
     override val description: String?
         get() = """
@@ -26,7 +28,10 @@ class UmlGeneratorMacro(private val staticContentInteractor: StaticContentIntera
         """.trimIndent()
 
     private val jobSet: MutableSet<String> = ConcurrentHashMap.newKeySet()
-    private val pathsToGeneratedUml = ConcurrentHashMap<String, String>()
+
+    private val pathsToGeneratedUml = Cache.Builder<String, String>().expireAfterAccess(
+        8.hours
+    ).build()
 
     override fun execute(args: Map<String, String>, dataAccessInteractor: SystemAccessInteractor): String {
 
@@ -42,7 +47,7 @@ class UmlGeneratorMacro(private val staticContentInteractor: StaticContentIntera
                         "-d", path
                     ))
 
-                    pathsToGeneratedUml[path] = result
+                    pathsToGeneratedUml.put(path, result)
 
                     jobSet.remove(path)
                 }
@@ -52,7 +57,7 @@ class UmlGeneratorMacro(private val staticContentInteractor: StaticContentIntera
             return """
                     ## UML for $path
                     
-                    ${pathsToGeneratedUml[path]}
+                    ${pathsToGeneratedUml.get(path) ?: "Not available...."}
                     
                     Note that ${if(alreadyRunning) "there is already a diagram in progress for this code" else "Diagramming has just been started"}  
                 """.trimIndent()
