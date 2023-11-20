@@ -15,8 +15,11 @@ dependencies {
     val kttVersion = "1.0.1.1000"
     implementation("com.github.kevinvandenbreemen:ktt:$kttVersion")
 
-    val grucdVersion = "1.0.0.2000"
-    implementation("com.github.kevinvandenbreemen:grucd-plantuml:$grucdVersion")
+    val grucdPlantVersion = "1.0.0.2000"
+    implementation("com.github.kevinvandenbreemen:grucd-plantuml:$grucdPlantVersion")
+
+    val grucdVersion = "1.0.6.2000"
+    implementation("com.github.kevinvandenbreemen:grucd:$grucdVersion")
 
     val coroutinesVersion = "1.7.3"
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")

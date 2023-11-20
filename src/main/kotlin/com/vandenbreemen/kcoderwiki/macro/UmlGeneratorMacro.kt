@@ -1,6 +1,9 @@
 package com.vandenbreemen.kcoderwiki.macro
 
+import com.vandenbreemen.grucd.builder.SourceCodeExtractor
 import com.vandenbreemen.grucd.main.Main
+import com.vandenbreemen.grucd.render.plantuml.PlantUMLRenderer
+import com.vandenbreemen.grucd.render.plantuml.PlantUMLScriptGenerator
 import com.vandenbreemen.ktt.interactor.StaticContentInteractor
 import com.vandenbreemen.ktt.interactor.SystemAccessInteractor
 import com.vandenbreemen.ktt.macro.Macro
@@ -43,11 +46,15 @@ class UmlGeneratorMacro(private val staticContentInteractor: StaticContentIntera
             } else  {
                 jobSet.add(path)
                 CoroutineScope(Dispatchers.IO).launch {
-                    val result = Main.generateAndProcessUML(arrayOf(
-                        "-d", path
-                    ))
 
-                    pathsToGeneratedUml.put(path, result)
+                    val extractor = SourceCodeExtractor()
+                    val fileList = extractor.getFilenamesToVisit(null, path)
+                    val model = extractor.buildModelWithFiles(fileList)
+                    val script = PlantUMLScriptGenerator().render(model)
+                    val plantUmlRenderer = PlantUMLRenderer()
+                    val svg = plantUmlRenderer.renderSVG(script)
+
+                    pathsToGeneratedUml.put(path, svg)
 
                     jobSet.remove(path)
                 }
