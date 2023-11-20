@@ -1,16 +1,16 @@
 package com.vandenbreemen.kcoderwiki.macro
 
 import com.vandenbreemen.grucd.builder.SourceCodeExtractor
-import com.vandenbreemen.grucd.main.Main
 import com.vandenbreemen.grucd.render.plantuml.PlantUMLRenderer
 import com.vandenbreemen.grucd.render.plantuml.PlantUMLScriptGenerator
+import com.vandenbreemen.ktt.api.SystemAccess
 import com.vandenbreemen.ktt.interactor.StaticContentInteractor
-import com.vandenbreemen.ktt.interactor.SystemAccessInteractor
 import com.vandenbreemen.ktt.macro.Macro
 import io.github.reactivecircus.cache4k.Cache
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentMap
 import kotlin.time.Duration.Companion.hours
 
 class UmlGeneratorMacro(private val staticContentInteractor: StaticContentInteractor,
@@ -38,7 +38,7 @@ class UmlGeneratorMacro(private val staticContentInteractor: StaticContentIntera
         8.hours
     ).build()
 
-    override fun execute(args: Map<String, String>, dataAccessInteractor: SystemAccessInteractor): String {
+    override fun execute(args: Map<String, String>, dataAccessInteractor: SystemAccess): String {
 
         args["path"] ?.let { path->
 
