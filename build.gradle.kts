@@ -18,7 +18,7 @@ dependencies {
     val grucdPlantVersion = "1.0.0.2000"
     implementation("com.github.kevinvandenbreemen:grucd-plantuml:$grucdPlantVersion")
 
-    val grucdVersion = "1.0.6.2000"
+    val grucdVersion = "1.0.6.3000"
     implementation("com.github.kevinvandenbreemen:grucd:$grucdVersion")
 
     val coroutinesVersion = "1.7.3"

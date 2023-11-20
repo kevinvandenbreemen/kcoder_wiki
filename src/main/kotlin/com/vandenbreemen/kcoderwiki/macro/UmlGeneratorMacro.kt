@@ -21,13 +21,15 @@ class UmlGeneratorMacro(private val staticContentInteractor: StaticContentIntera
         get() = "umlGen"
 
 
-    private val usage = "Usage:  path=/path/to/code"
+    private val usage = "Usage:  path=/path/to/code, annotations=MyAnnotation"
 
     override val description: String?
         get() = """
             Generates UML for the code in a specified path.
             ##### Specific Usage:
             $usage
+            
+            Note that the annotations item is optional.  Annotation names must be separated by spaces
         """.trimIndent()
 
     private val jobSet: MutableSet<String> = ConcurrentHashMap.newKeySet()
@@ -40,6 +42,8 @@ class UmlGeneratorMacro(private val staticContentInteractor: StaticContentIntera
 
         args["path"] ?.let { path->
 
+            val annotationsRaw = args["annotations"]?.split(" ")
+
             var alreadyRunning = false
             if(jobSet.contains(path)) {
                 alreadyRunning = true
@@ -48,6 +52,10 @@ class UmlGeneratorMacro(private val staticContentInteractor: StaticContentIntera
                 CoroutineScope(Dispatchers.IO).launch {
 
                     val extractor = SourceCodeExtractor()
+                    annotationsRaw?.let { annotationNames->
+                        annotationNames.forEach { name->extractor.filterForAnnotationType(name) }
+                    }
+
                     val fileList = extractor.getFilenamesToVisit(null, path)
                     val model = extractor.buildModelWithFiles(fileList)
                     val script = PlantUMLScriptGenerator().render(model)
